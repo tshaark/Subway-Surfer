@@ -1,23 +1,44 @@
 var cubeRotation = 0.0;
 
+var c;
+var c1;
+var wallL = new Array();
+var wallR = new Array();
+var track1 = new Array();
+var track2 = new Array();
+var track3 = new Array();
+var playerX=0.0,playerY=1.0,playerZ=-10.0;
+var textureCube,textureWall,textureTrack;
+var i=0;
 main();
 
 //
 // Start here
 //
 
-var c;
-var c1;
+
 
 function main() {
 
 
   const canvas = document.querySelector('#glcanvas');
   const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-
-  c = new cube(gl, [2, 5.0, -3.0]);
-  c1 = new cube(gl, [1.5, 0.0, -6.0]);
-  // If we don't have a GL context, give up now
+  textureCube = loadTexture(gl, 'surfer.png');
+  textureWall = loadTexture(gl, 'wall.png');
+  textureTrack = loadTexture(gl, 'track2.jpg');
+  
+  c = new cube(gl, [playerX, playerY, playerZ]);
+  for(i=0;i<100;i++)
+  {
+    wallL.push(new wall(gl,[7.0,0.0,-i*50]));
+    wallR.push(new wall(gl,[-7.0,0.0,-i*50]));
+  }
+  for(i=0;i<100;i++)
+  {
+    track1.push(new track(gl,[0.0,0.0,-i*50]));
+    track2.push(new track(gl,[14/3,0.0,-i*50]));
+    track3.push(new track(gl,[-14/3,0.0,-i*50]));
+  }
 
   if (!gl) {
     alert('Unable to initialize WebGL. Your browser or machine may not support it.');
@@ -28,26 +49,28 @@ function main() {
 
   const vsSource = `
     attribute vec4 aVertexPosition;
-    attribute vec4 aVertexColor;
+    attribute vec2 aTextureCoord;
 
     uniform mat4 uModelViewMatrix;
     uniform mat4 uProjectionMatrix;
 
-    varying lowp vec4 vColor;
+    varying highp vec2 vTextureCoord;
 
     void main(void) {
       gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
-      vColor = aVertexColor;
+      vTextureCoord = aTextureCoord;
     }
   `;
 
   // Fragment shader program
 
   const fsSource = `
-    varying lowp vec4 vColor;
+    varying highp vec2 vTextureCoord;
+
+    uniform sampler2D uSampler;
 
     void main(void) {
-      gl_FragColor = vColor;
+      gl_FragColor = texture2D(uSampler, vTextureCoord);
     }
   `;
 
@@ -63,11 +86,12 @@ function main() {
     program: shaderProgram,
     attribLocations: {
       vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
-      vertexColor: gl.getAttribLocation(shaderProgram, 'aVertexColor'),
+      textureCoord: gl.getAttribLocation(shaderProgram, 'aTextureCoord'),
     },
     uniformLocations: {
       projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
       modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
+      uSampler: gl.getUniformLocation(shaderProgram, 'uSampler'),
     },
   };
 
@@ -84,8 +108,9 @@ function main() {
     then = now;
 
     drawScene(gl, programInfo, deltaTime);
-
+    Mousetrap.bind('up', function() { c.pos[2]-= 0.2;  });
     requestAnimationFrame(render);
+
   }
   requestAnimationFrame(render);
 }
@@ -94,7 +119,7 @@ function main() {
 // Draw the scene.
 //
 function drawScene(gl, programInfo, deltaTime) {
-  gl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
+  gl.clearColor(135.0/256.0, 206.0/256.0, 250.0/256.0, 1.0);  // Clear to black, fully opaque
   gl.clearDepth(1.0);                 // Clear everything
   gl.enable(gl.DEPTH_TEST);           // Enable depth testing
   gl.depthFunc(gl.LEQUAL);            // Near things obscure far things
@@ -127,7 +152,7 @@ function drawScene(gl, programInfo, deltaTime) {
   // Set the drawing position to the "identity" point, which is
   // the center of the scene.
     var cameraMatrix = mat4.create();
-    mat4.translate(cameraMatrix, cameraMatrix, [2, 5, 0]);
+    mat4.translate(cameraMatrix, cameraMatrix, [0.0, c.pos[1]+2.0, c.pos[2]+10.0]);
     var cameraPosition = [
       cameraMatrix[12],
       cameraMatrix[13],
@@ -147,6 +172,17 @@ function drawScene(gl, programInfo, deltaTime) {
     mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
 
   c.drawCube(gl, viewProjectionMatrix, programInfo, deltaTime);
+  for(i=0;i<100;i++)
+  {
+    wallL[i].drawWall(gl, viewProjectionMatrix, programInfo, deltaTime);
+    wallR[i].drawWall(gl, viewProjectionMatrix, programInfo, deltaTime);
+  }
+  for(i=0;i<100;i++)
+  {
+    track1[i].drawTrack(gl, viewProjectionMatrix, programInfo, deltaTime);
+    track2[i].drawTrack(gl, viewProjectionMatrix, programInfo, deltaTime);
+    track3[i].drawTrack(gl, viewProjectionMatrix, programInfo, deltaTime);
+  }
   //c1.drawCube(gl, projectionMatrix, programInfo, deltaTime);
 
 }
@@ -199,4 +235,58 @@ function loadShader(gl, type, source) {
   }
 
   return shader;
+}
+
+//
+// Initialize a texture and load an image.
+// When the image finished loading copy it into the texture.
+//
+function loadTexture(gl, url) {
+  const texture = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+
+  // Because images have to be download over the internet
+  // they might take a moment until they are ready.
+  // Until then put a single pixel in the texture so we can
+  // use it immediately. When the image has finished downloading
+  // we'll update the texture with the contents of the image.
+  const level = 0;
+  const internalFormat = gl.RGBA;
+  const width = 1;
+  const height = 1;
+  const border = 0;
+  const srcFormat = gl.RGBA;
+  const srcType = gl.UNSIGNED_BYTE;
+  const pixel = new Uint8Array([0, 0, 255, 255]);  // opaque blue
+  gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
+                width, height, border, srcFormat, srcType,
+                pixel);
+
+  const image = new Image();
+  image.onload = function() {
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
+                  srcFormat, srcType, image);
+
+    // WebGL1 has different requirements for power of 2 images
+    // vs non power of 2 images so check if the image is a
+    // power of 2 in both dimensions.
+    if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
+       // Yes, it's a power of 2. Generate mips.
+       gl.generateMipmap(gl.TEXTURE_2D);
+    } else {
+       // No, it's not a power of 2. Turn off mips and set
+       // wrapping to clamp to edge
+       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    }
+  };
+  image.src = url;
+
+  return texture;
+}
+
+function isPowerOf2(value) {
+  return (value & (value - 1)) == 0;
 }

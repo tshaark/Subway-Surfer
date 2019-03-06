@@ -1,41 +1,15 @@
 /// <reference path="webgl.d.ts" />
 
-let cube = class {
+let wall = class {
     constructor(gl, pos) {
         this.positionBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
 
         this.positions = [
-             // Front face
-             -1.0, -1.0, 1.0,
-             1.0, -1.0, 1.0,
-             1.0, 1.0, 1.0,
-             -1.0, 1.0, 1.0,
-             //Back Face
-             -1.0, -1.0, -1.0,
-             1.0, -1.0, -1.0,
-             1.0, 1.0, -1.0,
-             -1.0, 1.0, -1.0,
-             //Top Face
-             -1.0, 1.0, -1.0,
-             1.0, 1.0, -1.0,
-             1.0, 1.0, 1.0,
-             -1.0, 1.0, 1.0,
-             //Bottom Face
-             -1.0, -1.0, -1.0,
-             1.0, -1.0, -1.0,
-             1.0, -1.0, 1.0,
-             -1.0, -1.0, 1.0,
-             //Left Face
-             -1.0, -1.0, -1.0,
-             -1.0, 1.0, -1.0,
-             -1.0, 1.0, 1.0,
-             -1.0, -1.0, 1.0,
-             //Right Face
-             1.0, -1.0, -1.0,
-             1.0, 1.0, -1.0,
-             1.0, 1.0, 1.0,
-             1.0, -1.0, 1.0,
+            0.0,0.0,0.0,
+            0.0,0.0,-50.0,
+            0.0,10.0,-50.0,
+            0.0,10.0,0.0
         ];
 
         this.rotation = 0;
@@ -43,7 +17,7 @@ let cube = class {
         this.pos = pos;
 
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.positions), gl.STATIC_DRAW);
-    
+        
         const indexBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
 
@@ -53,11 +27,6 @@ let cube = class {
 
         const indices = [
             0, 1, 2,    0, 2, 3, // front
-            4, 5, 6,    4, 6, 7,
-            8, 9, 10,   8, 10, 11,
-            12, 13, 14, 12, 14, 15,
-            16, 17, 18, 16, 18, 19,
-            20, 21, 22, 20, 22, 23, 
         ];
 
         // Now send the element array to GL
@@ -70,31 +39,6 @@ let cube = class {
           
             const textureCoordinates = [
               // Front
-              0.0,  0.0,
-              1.0,  0.0,
-              1.0,  1.0,
-              0.0,  1.0,
-              // Back
-              0.0,  0.0,
-              1.0,  0.0,
-              1.0,  1.0,
-              0.0,  1.0,
-              // Top
-              0.0,  0.0,
-              1.0,  0.0,
-              1.0,  1.0,
-              0.0,  1.0,
-              // Bottom
-              0.0,  0.0,
-              1.0,  0.0,
-              1.0,  1.0,
-              0.0,  1.0,
-              // Right
-              0.0,  0.0,
-              1.0,  0.0,
-              1.0,  1.0,
-              0.0,  1.0,
-              // Left
               0.0,  0.0,
               1.0,  0.0,
               1.0,  1.0,
@@ -113,7 +57,7 @@ let cube = class {
 
     }
 
-    drawCube(gl, projectionMatrix, programInfo, deltaTime) {
+    drawWall(gl, projectionMatrix, programInfo, deltaTime) {
         const modelViewMatrix = mat4.create();
         mat4.translate(
             modelViewMatrix,
@@ -146,25 +90,6 @@ let cube = class {
                 programInfo.attribLocations.vertexPosition);
         }
 
-        // Tell WebGL how to pull out the colors from the color buffer
-        // into the vertexColor attribute.
-        // {
-        //     const numComponents = 4;
-        //     const type = gl.FLOAT;
-        //     const normalize = false;
-        //     const stride = 0;
-        //     const offset = 0;
-        //     gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer.color);
-        //     gl.vertexAttribPointer(
-        //         programInfo.attribLocations.vertexColor,
-        //         numComponents,
-        //         type,
-        //         normalize,
-        //         stride,
-        //         offset);
-        //     gl.enableVertexAttribArray(
-        //         programInfo.attribLocations.vertexColor);
-        // }
 
         {
             const num = 2; // every coordinate composed of 2 values
@@ -198,13 +123,13 @@ let cube = class {
             gl.activeTexture(gl.TEXTURE0);
 
             // Bind the texture to texture unit 0
-            gl.bindTexture(gl.TEXTURE_2D, textureCube);
+            gl.bindTexture(gl.TEXTURE_2D, textureWall);
           
             // Tell the shader we bound the texture to texture unit 0
             gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
 
         {
-            const vertexCount = 36;
+            const vertexCount = 6;
             const type = gl.UNSIGNED_SHORT;
             const offset = 0;
             gl.drawElements(gl.TRIANGLES, vertexCount, type, offset);
