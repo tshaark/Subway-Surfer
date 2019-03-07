@@ -1,14 +1,15 @@
 var cubeRotation = 0.0;
 
-var c;
+var c,coin;
 var c1;
 var wallL = new Array();
 var wallR = new Array();
+var cont = new Array();
 var track1 = new Array();
 var track2 = new Array();
 var track3 = new Array();
 var playerX=0.0,playerY=1.0,playerZ=-10.0;
-var textureCube,textureWall,textureTrack;
+var textureCube,textureWall,textureTrack,textureContainer,textureCoin;
 var i=0;
 main();
 
@@ -24,10 +25,27 @@ function main() {
   const canvas = document.querySelector('#glcanvas');
   const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
   textureCube = loadTexture(gl, 'surfer.png');
-  textureWall = loadTexture(gl, 'wall.png');
-  textureTrack = loadTexture(gl, 'track2.jpg');
-  
+  textureWall = loadTexture(gl, 'wall1.jpeg');
+  textureTrack = loadTexture(gl, 'tr.png');
+  textureContainer = loadTexture(gl, 'container.png')
+  // textureCoin = loadTexture(gl, 'container.png')
   c = new cube(gl, [playerX, playerY, playerZ]);
+  for(i=0;i<50;i++)
+  {
+    var a = Math.floor(Math.random() * 101);
+    if(a%2 == 0)
+    {
+      cont.push( new container(gl, [14/3,1.2,-i*50.0]));
+    }
+    else if(a%3 == 0)
+    {
+      cont.push( new container(gl, [0.0,1.2,-i*70.0]));
+    }
+    else
+    {
+      cont.push( new container(gl, [-14/3,1.2,-i*80.0]));
+    }
+  }
   for(i=0;i<100;i++)
   {
     wallL.push(new wall(gl,[7.0,0.0,-i*50]));
@@ -39,12 +57,13 @@ function main() {
     track2.push(new track(gl,[14/3,0.0,-i*50]));
     track3.push(new track(gl,[-14/3,0.0,-i*50]));
   }
-
+  // coin = new coins(gl, [0.0,5.0,-15.0]);
+  
   if (!gl) {
     alert('Unable to initialize WebGL. Your browser or machine may not support it.');
     return;
   }
-
+  
   // Vertex shader program
 
   const vsSource = `
@@ -106,9 +125,34 @@ function main() {
     now *= 0.001;  // convert to seconds
     const deltaTime = now - then;
     then = now;
-
     drawScene(gl, programInfo, deltaTime);
-    Mousetrap.bind('up', function() { c.pos[2]-= 0.2;  });
+    c.pos[2]-= 0.2;
+    Mousetrap.bind('right', function() { 
+      if(c.pos[0]<14/3)
+      {
+        c.pos[0] += 14/3;
+      }
+    });
+    Mousetrap.bind('left', function() { 
+      if(c.pos[0]>-14/3)
+      {
+        c.pos[0] -= 14/3;
+      }
+    });
+    
+    Mousetrap.bind('up', function() { 
+      if(c.pos[1] > 0)
+      {
+        if(c.pos[1]<=5.0){
+          c.pos[1] += 4.0;
+        }
+      }
+    });
+    if(c.pos[1] > 1)
+    {
+      c.pos[1]-=0.1633;
+    }
+    // console.log(c.pos[1]);
     requestAnimationFrame(render);
 
   }
@@ -152,7 +196,7 @@ function drawScene(gl, programInfo, deltaTime) {
   // Set the drawing position to the "identity" point, which is
   // the center of the scene.
     var cameraMatrix = mat4.create();
-    mat4.translate(cameraMatrix, cameraMatrix, [0.0, c.pos[1]+2.0, c.pos[2]+10.0]);
+    mat4.translate(cameraMatrix, cameraMatrix, [0.0, 3.0, c.pos[2]+10.0]);
     var cameraPosition = [
       cameraMatrix[12],
       cameraMatrix[13],
@@ -161,7 +205,7 @@ function drawScene(gl, programInfo, deltaTime) {
 
     var up = [0, 1, 0];
 
-    mat4.lookAt(cameraMatrix, cameraPosition, c.pos, up);
+    mat4.lookAt(cameraMatrix, cameraPosition, [0.0,1.0,c.pos[2]], up);
 
     var viewMatrix = cameraMatrix;//mat4.create();
 
@@ -183,8 +227,11 @@ function drawScene(gl, programInfo, deltaTime) {
     track2[i].drawTrack(gl, viewProjectionMatrix, programInfo, deltaTime);
     track3[i].drawTrack(gl, viewProjectionMatrix, programInfo, deltaTime);
   }
-  //c1.drawCube(gl, projectionMatrix, programInfo, deltaTime);
-
+  for(i=0;i<50;i++)
+  {
+    cont[i].drawContainer(gl, viewProjectionMatrix, programInfo, deltaTime);
+  }
+  // coin.drawCoins((gl, viewProjectionMatrix, programInfo, deltaTime));
 }
 
 //
