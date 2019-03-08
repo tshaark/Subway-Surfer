@@ -104,13 +104,50 @@ let container = class {
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoordinates),
                           gl.STATIC_DRAW);
           
+            this.normalBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
+            this.vertexNormals = [
+                0,0,1.0,
+                0,0,1.0,
+                0,0,1.0,
+                0,0,1.0,
+
+                0,0,-1.0,
+                0,0,-1.0,
+                0,0,-1.0,
+                0,0,-1.0,
+
+                0,1.0,0,
+                0,1.0,0,
+                0,1.0,0,
+                0,1.0,0,
+
+                0,-1.0,0,
+                0,-1.0,0,
+                0,-1.0,0,
+                0,-1.0,0,
+
+                -1.0,0,0,
+                -1.0,0,0,
+                -1.0,0,0,
+                -1.0,0,0,
+
+                -1.0,0,0,
+                -1.0,0,0,
+                -1.0,0,0,
+                -1.0,0,0,
+
+            ];
+
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertexNormals),
+                        gl.STATIC_DRAW);
 
         this.buffer = {
             position: this.positionBuffer,
             textureCoord: textureCoordBuffer,
             indices: indexBuffer,
-        }
-
+            normals: this.normalBuffer,
+        }              
     }
 
     drawContainer(gl, projectionMatrix, programInfo, deltaTime) {
@@ -145,27 +182,6 @@ let container = class {
             gl.enableVertexAttribArray(
                 programInfo.attribLocations.vertexPosition);
         }
-
-        // Tell WebGL how to pull out the colors from the color buffer
-        // into the vertexColor attribute.
-        // {
-        //     const numComponents = 4;
-        //     const type = gl.FLOAT;
-        //     const normalize = false;
-        //     const stride = 0;
-        //     const offset = 0;
-        //     gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer.color);
-        //     gl.vertexAttribPointer(
-        //         programInfo.attribLocations.vertexColor,
-        //         numComponents,
-        //         type,
-        //         normalize,
-        //         stride,
-        //         offset);
-        //     gl.enableVertexAttribArray(
-        //         programInfo.attribLocations.vertexColor);
-        // }
-
         {
             const num = 2; // every coordinate composed of 2 values
             const type = gl.FLOAT; // the data in the buffer is 32 bit float
@@ -176,6 +192,26 @@ let container = class {
             gl.vertexAttribPointer(programInfo.attribLocations.textureCoord, num, type, normalize, stride, offset);
             gl.enableVertexAttribArray(programInfo.attribLocations.textureCoord);
         }
+        {
+            const nums = 3;
+            const type = gl.FLOAT;
+            const normalize = false;
+            const stride = 0;
+            const offset = 0;
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer.normals);
+            gl.vertexAttribPointer(
+                programInfo.attribLocations.vertexNormal,
+                nums,
+                type,
+                normalize,
+                stride,
+                offset);
+            gl.enableVertexAttribArray(
+                programInfo.attribLocations.vertexNormal);
+        }
+        const normalMatrix = mat4.create();
+        mat4.invert(normalMatrix, modelViewMatrix);
+        mat4.transpose(normalMatrix, normalMatrix);
 
         
         // Tell WebGL which indices to use to index the vertices
@@ -195,6 +231,11 @@ let container = class {
             programInfo.uniformLocations.modelViewMatrix,
             false,
             modelViewMatrix);
+            gl.activeTexture(gl.TEXTURE0);
+        gl.uniformMatrix4fv(
+            programInfo.uniformLocations.normalMatrix,
+            false,
+            normalMatrix);
             gl.activeTexture(gl.TEXTURE0);
 
             // Bind the texture to texture unit 0

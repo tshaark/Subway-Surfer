@@ -6,27 +6,31 @@ let hazardboards = class {
         gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
 
         this.positions = [
-             // Front face
              -2, -1.2,  0.1,
               2, -1.2,  0.1,
               2,  1.2,  0.1,
              -2,  1.2,  0.1,
+             
              -2, -1.2, -0.1,
               2, -1.2, -0.1,
               2,  1.2, -0.1,
              -2,  1.2, -0.1,
+             
              -2,  1.2, -0.1,
               2,  1.2, -0.1,
               2,  1.2,  0.1,
              -2,  1.2,  0.1,
+             
              -2, -1.2, -0.1,
               2, -1.2, -0.1,
               2, -1.2,  0.1,
              -2, -1.2,  0.1,
+            
              -2, -1.2, -0.1,
              -2,  1.2, -0.1,
              -2,  1.2,  0.1,
              -2, -1.2,  0.1,
+            
               2, -1.2, -0.1,
               2,  1.2, -0.1,
               2,  1.2,  0.1,
@@ -98,12 +102,50 @@ let hazardboards = class {
           
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoordinates),
                           gl.STATIC_DRAW);
-          
+                         
+            this.normalBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
+            this.vertexNormals = [
+                0,0,1.0,
+                0,0,1.0,
+                0,0,1.0,
+                0,0,1.0,
+
+                0,0,-1.0,
+                0,0,-1.0,
+                0,0,-1.0,
+                0,0,-1.0,
+
+                0,1.0,0,
+                0,1.0,0,
+                0,1.0,0,
+                0,1.0,0,
+
+                0,-1.0,0,
+                0,-1.0,0,
+                0,-1.0,0,
+                0,-1.0,0,
+
+                -1.0,0,0,
+                -1.0,0,0,
+                -1.0,0,0,
+                -1.0,0,0,
+
+                -1.0,0,0,
+                -1.0,0,0,
+                -1.0,0,0,
+                -1.0,0,0,
+
+            ];
+
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertexNormals),
+                        gl.STATIC_DRAW);
 
         this.buffer = {
             position: this.positionBuffer,
             textureCoord: textureCoordBuffer,
             indices: indexBuffer,
+            normals: this.normalBuffer,
         }
 
     }
@@ -171,7 +213,27 @@ let hazardboards = class {
             gl.vertexAttribPointer(programInfo.attribLocations.textureCoord, num, type, normalize, stride, offset);
             gl.enableVertexAttribArray(programInfo.attribLocations.textureCoord);
         }
+        {
+            const nums = 3;
+            const type = gl.FLOAT;
+            const normalize = false;
+            const stride = 0;
+            const offset = 0;
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer.normals);
+            gl.vertexAttribPointer(
+                programInfo.attribLocations.vertexNormal,
+                nums,
+                type,
+                normalize,
+                stride,
+                offset);
+            gl.enableVertexAttribArray(
+                programInfo.attribLocations.vertexNormal);
+        }
 
+        const normalMatrix = mat4.create();
+        mat4.invert(normalMatrix, modelViewMatrix);
+        mat4.transpose(normalMatrix, normalMatrix);
         
         // Tell WebGL which indices to use to index the vertices
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.buffer.indices);
@@ -190,6 +252,10 @@ let hazardboards = class {
             programInfo.uniformLocations.modelViewMatrix,
             false,
             modelViewMatrix);
+        gl.uniformMatrix4fv(
+            programInfo.uniformLocations.normalMatrix,
+            false,
+            normalMatrix);
             gl.activeTexture(gl.TEXTURE0);
 
             // Bind the texture to texture unit 0

@@ -149,7 +149,7 @@ function main() {
     const deltaTime = now - then;
     then = now;
     drawScene(gl, programInfo, deltaTime);
-    // c.pos[2]-= 0.2;
+    c.pos[2]-= 0.2;
     Mousetrap.bind('right', function() { 
       if(c.pos[0]<14/3)
       {
@@ -235,27 +235,27 @@ function drawScene(gl, programInfo, deltaTime) {
     //mat4.invert(viewMatrix, cameraMatrix);
 
     var viewProjectionMatrix = mat4.create();
-
+    
     mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
-
-  c.drawCube(gl, viewProjectionMatrix, programInfo, deltaTime);
-  for(i=0;i<100;i++)
-  {
-    wallL[i].drawWall(gl, viewProjectionMatrix, programInfo, deltaTime);
-    wallR[i].drawWall(gl, viewProjectionMatrix, programInfo, deltaTime);
-  }
-  for(i=0;i<100;i++)
-  {
-    track1[i].drawTrack(gl, viewProjectionMatrix, programInfo, deltaTime);
-    track2[i].drawTrack(gl, viewProjectionMatrix, programInfo, deltaTime);
-    track3[i].drawTrack(gl, viewProjectionMatrix, programInfo, deltaTime);
-  }
-  for(i=0;i<50;i++)
-  {
-    cont[i].drawContainer(gl, viewProjectionMatrix, programInfo, deltaTime);
-  }
-  coin.drawCoins(gl, viewProjectionMatrix, programInfo, deltaTime);
-  hazard.drawHazardboards(gl, viewProjectionMatrix, programInfo, deltaTime);
+    
+    c.drawCube(gl, viewProjectionMatrix, programInfo, deltaTime);
+    for(i=0;i<100;i++)
+    {
+      wallL[i].drawWall(gl, viewProjectionMatrix, programInfo, deltaTime);
+      wallR[i].drawWall(gl, viewProjectionMatrix, programInfo, deltaTime);
+    }
+    hazard.drawHazardboards(gl, viewProjectionMatrix, programInfo, deltaTime);
+    coin.drawCoins(gl, viewProjectionMatrix, programInfo, deltaTime);
+    for(i=0;i<100;i++)
+    {
+      track1[i].drawTrack(gl, viewProjectionMatrix, programInfo, deltaTime);
+      track2[i].drawTrack(gl, viewProjectionMatrix, programInfo, deltaTime);
+      track3[i].drawTrack(gl, viewProjectionMatrix, programInfo, deltaTime);
+    }
+    for(i=0;i<50;i++)
+    {
+      cont[i].drawContainer(gl, viewProjectionMatrix, programInfo, deltaTime);
+    }
 }
 
 //
