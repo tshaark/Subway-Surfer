@@ -1,7 +1,8 @@
 var cubeRotation = 0.0;
 
-var c,coin;
+var c;
 var c1;
+var coin;
 var wallL = new Array();
 var wallR = new Array();
 var cont = new Array();
@@ -28,7 +29,7 @@ function main() {
   textureWall = loadTexture(gl, 'wall1.jpeg');
   textureTrack = loadTexture(gl, 'tr.png');
   textureContainer = loadTexture(gl, 'container.png')
-  // textureCoin = loadTexture(gl, 'container.png')
+  textureCoin = loadTexture(gl, 'coin.png')
   c = new cube(gl, [playerX, playerY, playerZ]);
   for(i=0;i<50;i++)
   {
@@ -57,7 +58,7 @@ function main() {
     track2.push(new track(gl,[14/3,0.0,-i*50]));
     track3.push(new track(gl,[-14/3,0.0,-i*50]));
   }
-  // coin = new coins(gl, [0.0,5.0,-15.0]);
+  coin = new coins(gl, [0.0,1.2,-15.0]);
   
   if (!gl) {
     alert('Unable to initialize WebGL. Your browser or machine may not support it.');
@@ -126,7 +127,7 @@ function main() {
     const deltaTime = now - then;
     then = now;
     drawScene(gl, programInfo, deltaTime);
-    c.pos[2]-= 0.2;
+    // c.pos[2]-= 0.2;
     Mousetrap.bind('right', function() { 
       if(c.pos[0]<14/3)
       {
@@ -231,7 +232,7 @@ function drawScene(gl, programInfo, deltaTime) {
   {
     cont[i].drawContainer(gl, viewProjectionMatrix, programInfo, deltaTime);
   }
-  // coin.drawCoins((gl, viewProjectionMatrix, programInfo, deltaTime));
+  coin.drawCoins(gl, viewProjectionMatrix, programInfo, deltaTime);
 }
 
 //
