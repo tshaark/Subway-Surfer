@@ -1,7 +1,7 @@
 var cubeRotation = 0.0;
-
+var time = 0;
 var headd,bodyy,legL,legR;
-var c1,flag=0,upVelocity = 1.0;
+var c1,flag=0,upVelocity = 1.0,flagCoin = 0;
 var coin,hazard,speedBreaker;
 var wallL = new Array();
 var wallR = new Array();
@@ -35,7 +35,7 @@ function main() {
 
   bodyy = new body(gl, [playerX, playerY, playerZ]);
   headd = new head(gl, [playerX, playerY+1.0, playerZ]);
-  speedBreaker = new breaker(gl, [0.0, 0.3, -40.0]);
+  speedBreaker = new breaker(gl, [0.0, 0.0, -40.0]);
   for(i=0;i<50;i++)
   {
     var a = Math.floor(Math.random() * 101);
@@ -63,7 +63,7 @@ function main() {
     track2.push(new track(gl,[14/3,0.0,-i*50]));
     track3.push(new track(gl,[-14/3,0.0,-i*50]));
   }
-  coin = new coins(gl, [0.0,1.2,-15.0]);
+  coin = new coins(gl, [0.0,1.2,-30.0]);
   hazard = new hazardboards(gl, [14/3,2.2,-10.0]);
   
   if (!gl) {
@@ -142,6 +142,15 @@ function main() {
 
   // Here's where we call the routine that builds all the
   // objects we'll be drawing.
+
+  // var boundin_box_coin = {
+  //   x : ,
+  //   y : ,
+  //   z : ,
+  //   len : ,
+  //   widht : ,
+  //   height : ,
+  // };
   //const buffers
 
   var then = 0;
@@ -152,13 +161,53 @@ function main() {
     const deltaTime = now - then;
     then = now;
     drawScene(gl, programInfo, deltaTime);
-    if(coin.pos[0]==bodyy.pos[0] && coin.pos[0]==bodyy.pos[0] && coin.pos[0]==bodyy.pos[0])
+    var x = bodyy.pos[0];
+    var y = bodyy.pos[1];
+    var z = bodyy.pos[2];
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+    //convert into loop later for multiple coins
+    if(Math.sqrt((coin.pos[0]-x)*(coin.pos[0]-x) + (coin.pos[1]-y)*(coin.pos[1]-y) + (coin.pos[2]-z)*(coin.pos[2]-z))<= 1.21)
     {
-      console.log("loda");
+      coin.pos[2] -= 50.0;
     }
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////
     
-    bodyy.pos[2]-= 0.2;
-    headd.pos[2]-= 0.2;
+
+    //convert into loop later for multiple speedbreakers
+    if(speedBreaker.pos[0] == x && speedBreaker.pos[1] == y)
+    {
+      if( z-speedBreaker.pos[2] <= 0.2 && z-speedBreaker.pos[2] >= -0.2)
+      {
+        if(time == 1)
+        {
+         alert("GAME OVER");
+        }
+        time = 1;
+      }
+    }
+    if(time > 0)
+    {
+      bodyy.pos[2]-= 0.1;
+      headd.pos[2]-= 0.1;
+      time++;
+      if(time >=120)
+      {
+        time = 0;
+      }  
+    }
+    else
+    {
+      bodyy.pos[2]-= 0.2;
+      headd.pos[2]-= 0.2;
+    }
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+
     Mousetrap.bind('right', function() { 
       if(bodyy.pos[0]<14/3)
       {
@@ -193,8 +242,10 @@ function main() {
         upVelocity = 1.0;
       }
     }
-    console.log(bodyy.pos[1]);
-    // console.log(bodyy.pos[1]);
+ ///////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
     requestAnimationFrame(render);
 
   }
@@ -266,7 +317,10 @@ function drawScene(gl, programInfo, deltaTime) {
     bodyy.drawBody(gl, viewProjectionMatrix, programInfo, deltaTime);
     headd.drawHead(gl, viewProjectionMatrix, programInfo, deltaTime);
     hazard.drawHazardboards(gl, viewProjectionMatrix, programInfo, deltaTime);
-    coin.drawCoins(gl, viewProjectionMatrix, programInfo, deltaTime);
+    if(flagCoin == 0)
+    {
+      coin.drawCoins(gl, viewProjectionMatrix, programInfo, deltaTime);
+    }
     for(i=0;i<100;i++)
     {
       wallL[i].drawWall(gl, viewProjectionMatrix, programInfo, deltaTime);
