@@ -2,7 +2,7 @@ var cubeRotation = 0.0;
 var time = 0;
 var headd,bodyy,legL,legR;
 var c1,flag=0,upVelocity = 1.0,flagCoin = 0,flagSlide = 0,timeSlide = 0;
-var coin,hazard,speedBreaker;
+var coin,hazard,speedBreaker,bootup,bootdown;
 var wallL = new Array();
 var wallR = new Array();
 var cont = new Array();
@@ -10,9 +10,10 @@ var track1 = new Array();
 var track2 = new Array();
 var track3 = new Array();
 var playerX=0.0,playerY=0.0,playerZ=-10.0;
-var textureCube,textureWall,textureTrack,textureContainer,textureCoin,textureHazard,textureBreaker,textureHead;
+var textureCube,textureWall,textureTrack,textureContainer,textureCoin,textureHazard,textureBreaker,textureHead,textureBootsup,textureBootsdown;
 var i=0;
 var aboveTrain = 0;
+var programInfo;
 main();
 
 //
@@ -33,9 +34,13 @@ function main() {
   textureHazard = loadTexture(gl, 'hazad.png');
   textureBreaker = loadTexture(gl, 'breaker.jpeg');
   textureHead = loadTexture(gl, 'head.jpeg');
+  textureBootsup = loadTexture(gl, 'bootsup.png');
+  textureBootsdown = loadTexture(gl, 'bootsdown.jpeg');
 
   bodyy = new body(gl, [playerX, playerY, playerZ]);
   headd = new head(gl, [playerX, playerY+1.0, playerZ]);
+  bootup = new bootsup(gl, [0.0, 1.0, -20 + 0.8])
+  bootdown = new bootsdown(gl, [0.0, 0.4, -20.0 ])
   speedBreaker = new breaker(gl, [0.0, 0.0, -40.0]);
   for(i=0;i<50;i++)
   {
@@ -118,15 +123,36 @@ function main() {
     }
   `;
 
+  const fsSource1 = `
+    varying highp vec2 vTextureCoord;
+    varying highp vec3 vLighting;
+
+    uniform sampler2D uSampler;
+
+    void main(void) {
+      highp vec4 texelColor = texture2D(uSampler, vTextureCoord);
+      gl_FragColor = vec4(texelColor.rgb * vLighting, texelColor.a);
+      precision highp float;
+      vec4 color = texture2D(uSampler, vTextureCoord);
+      float gray = dot(color.rgb,vec3(0.299,0.587,0.114));
+      gl_FragColor = vec4(vec3(gray),1.0);
+    }
+  `;
+
   // Initialize a shader program; this is where all the lighting
   // for the vertices and so forth is established.
-  const shaderProgram = initShaderProgram(gl, vsSource, fsSource);
+  // if(flagGray = 0)
+  // {
+    const shaderProgram = initShaderProgram(gl, vsSource, fsSource);
+    const shaderProgram1 = initShaderProgram(gl, vsSource, fsSource1);
+  // }
+
 
   // Collect all the info needed to use the shader program.
   // Look up which attributes our shader program is using
   // for aVertexPosition, aVevrtexColor and also
   // look up uniform locations.
-  const programInfo = {
+   programInfo = {
     program: shaderProgram,
     attribLocations: {
       vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
@@ -289,7 +315,39 @@ function main() {
         upVelocity = 1.0;
       }
     }
+    Mousetrap.bind('g', function() { 
+      programInfo = {
+        program: shaderProgram1,
+        attribLocations: {
+          vertexPosition: gl.getAttribLocation(shaderProgram1, 'aVertexPosition'),
+          vertexNormal: gl.getAttribLocation(shaderProgram1, 'aVertexNormal'),
+          textureCoord: gl.getAttribLocation(shaderProgram1, 'aTextureCoord'),
+        },
+        uniformLocations: {
+          projectionMatrix: gl.getUniformLocation(shaderProgram1, 'uProjectionMatrix'),
+          modelViewMatrix: gl.getUniformLocation(shaderProgram1, 'uModelViewMatrix'),
+          normalMatrix: gl.getUniformLocation(shaderProgram1, 'uNormalMatrix'),
+          uSampler: gl.getUniformLocation(shaderProgram1, 'uSampler'),
+        },
+      };
+    });
 
+    Mousetrap.bind('c', function() { 
+      programInfo = {
+        program: shaderProgram,
+        attribLocations: {
+          vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
+          vertexNormal: gl.getAttribLocation(shaderProgram, 'aVertexNormal'),
+          textureCoord: gl.getAttribLocation(shaderProgram, 'aTextureCoord'),
+        },
+        uniformLocations: {
+          projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
+          modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
+          normalMatrix: gl.getUniformLocation(shaderProgram, 'uNormalMatrix'),
+          uSampler: gl.getUniformLocation(shaderProgram, 'uSampler'),
+        },
+      };
+    });
  ///////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -378,6 +436,8 @@ function drawScene(gl, programInfo, deltaTime) {
     {
       cont[i].drawContainer(gl, viewProjectionMatrix, programInfo, deltaTime);
     }
+    bootup.drawBootsup(gl, viewProjectionMatrix, programInfo, deltaTime);
+    bootdown.drawBootsdown(gl, viewProjectionMatrix, programInfo, deltaTime);
 }
 
 //
