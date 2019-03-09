@@ -1,14 +1,14 @@
 /// <reference path="webgl.d.ts" />
 
-let jetpack = class {
+let policehead = class {
     constructor(gl, pos) {
         this.positionBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
 
         this.positions = [];
         var n=40;
-        var r1=0.2;
-        var r2=0.0;
+        var r1=0.3;
+        var r2=0.3;
         var M_PI=Math.PI;
         // var g_vertex_buffer_data[9*n+9];
         for ( i = 0; i < n; i++)
@@ -20,11 +20,11 @@ let jetpack = class {
             var x2=Math.cos(angle2);
             var y2=Math.sin(angle2);
             this.positions.push(r2*x1);
-            this.positions.push(1.5);
+            this.positions.push(0.4);
             this.positions.push(r2*y1);
 
             this.positions.push(r2*x2);
-            this.positions.push(1.5);
+            this.positions.push(0.4);
             this.positions.push(r2*y2);
 
             this.positions.push(r1*x1);
@@ -41,7 +41,7 @@ let jetpack = class {
             this.positions.push(r1*y2);
             
             this.positions.push(r2*x2);
-            this.positions.push(1.5);
+            this.positions.push(0.4);
             this.positions.push(r2*y2);
 
            
@@ -60,15 +60,15 @@ let jetpack = class {
             
             
             this.positions.push(0.0);
-            this.positions.push(1.0);
+            this.positions.push(0.4);
             this.positions.push(0.0);
 
             this.positions.push(r2*x1);
-            this.positions.push(1.5);
+            this.positions.push(0.4);
             this.positions.push(r2*y1);
 
             this.positions.push(r2*x2);
-            this.positions.push(1.5);
+            this.positions.push(0.4);
             this.positions.push(r2*y2);           
         } 
         this.rotation = 0;
@@ -202,7 +202,7 @@ let jetpack = class {
 
     }
 
-    drawJetpack(gl, projectionMatrix, programInfo, deltaTime) {   
+    drawPolicehead(gl, projectionMatrix, programInfo, deltaTime) {   
         const modelViewMatrix = mat4.create();
         mat4.translate(
             modelViewMatrix,
@@ -215,7 +215,7 @@ let jetpack = class {
         mat4.rotate(modelViewMatrix,
             modelViewMatrix,
             this.rotation,
-            [1, 1, 0]);
+            [0, 1, 0]);
             
         
         {
@@ -293,7 +293,7 @@ let jetpack = class {
         gl.activeTexture(gl.TEXTURE0);
 
         // Bind the texture to texture unit 0
-        gl.bindTexture(gl.TEXTURE_2D, textureJetpack);
+        gl.bindTexture(gl.TEXTURE_2D, texturePolicehead);
         
         // Tell the shader we bound the texture to texture unit 0
         gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
@@ -303,7 +303,7 @@ let jetpack = class {
             // gl.drawElements(gl.TRIANGLES, 3*n, type, offset);
             gl.drawArrays(gl.TRIANGLES, 0,this.positions.length/3);
         }
-        this.rotation += 0.05;
+        // this.rotation += 0.05;
 
     }
 };

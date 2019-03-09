@@ -1,6 +1,6 @@
 var cubeRotation = 0.0;
 var time = 0;
-var headd,bodyy,legL,legR;
+var headd,bodyy,legL,legR,policeheadd,policebodyy,dogg;
 var c1,flag=0,upVelocity = 1.0,upVelocity1 = 1.5,flagCoin = 0,flagSlide = 0,timeSlide = 0,flagShoe = 0,timeShoe = 0,flagJet = 0,timeJet = 0,flagDescend = 0;
 var coin,hazard,speedBreaker,bootup,bootdown,jetpackk;
 var wallL = new Array();
@@ -10,16 +10,11 @@ var track1 = new Array();
 var track2 = new Array();
 var track3 = new Array();
 var playerX=0.0,playerY=0.0,playerZ=-10.0;
-var textureCube,textureWall,textureTrack,textureContainer,textureCoin,textureHazard,textureBreaker,textureHead,textureBootsup,textureBootsdown,textureJetpack;
+var textureCube,textureWall,textureTrack,textureContainer,textureCoin,textureHazard,textureBreaker,textureHead,textureBootsup,textureBootsdown,textureJetpack,texturePolicebody,texturePolicehead,textureDog;
 var i=0;
 var aboveTrain = 0;
 var programInfo;
 main();
-
-//
-// Start here
-//
-
 
 function main() {
 
@@ -37,13 +32,22 @@ function main() {
   textureBootsup = loadTexture(gl, 'bootsup.png');
   textureBootsdown = loadTexture(gl, 'bootsdown.jpeg');
   textureJetpack = loadTexture(gl, 'jetpack.jpeg');
+  texturePolicebody = loadTexture(gl, 'policebody.png');
+  texturePolicehead = loadTexture(gl, 'policehead.png');
+  textureDog = loadTexture(gl, 'dog.jpeg');
 
   bodyy = new body(gl, [playerX, playerY, playerZ]);
   headd = new head(gl, [playerX, playerY+1.0, playerZ]);
+  dogg = new dog(gl, [playerX + 1.0 , playerY + 0.3, playerZ]);
+
   bootup = new bootsup(gl, [-0.6, 0.4 + 0.6, -20.0]);
   bootdown = new bootsdown(gl, [0.0, 0.4, -20.0 ]);
   speedBreaker = new breaker(gl, [0.0, 0.0, -40.0]);
-  jetpackk = new jetpack(gl, [0.0, 1.0, -40.0]);
+  jetpackk = new jetpack(gl, [0.0, 1.0, -50.0]);
+  policebodyy = new policebody(gl, [playerX, playerY, playerZ + 2.0]);
+  policeheadd = new policehead(gl, [playerX, playerY+1.0, playerZ + 2.0]);
+  
+  
   for(i=0;i<50;i++)
   {
     var a = Math.floor(Math.random() * 101);
@@ -260,12 +264,17 @@ function main() {
          alert("GAME OVER");
         }
         time = 1;
+        policebodyy.pos[2] = bodyy.pos[2] + 2.0;
+        policeheadd.pos[2] = headd.pos[2] + 2.0;
       }
     }
     if(time > 0)
     {
       bodyy.pos[2]-= 0.1;
       headd.pos[2]-= 0.1;
+      dogg.pos[2]-= 0.1;
+      policebodyy.pos[2]-= 0.1;
+      policeheadd.pos[2]-= 0.1;
       time++;
       if(time >=120)
       {
@@ -278,11 +287,17 @@ function main() {
       {
         headd.pos[2]-= 0.4;
         bodyy.pos[2]-= 0.4;
+        dogg.pos[2]-= 0.4;
+        policebodyy.pos[2]-= 0.25;
+        policeheadd.pos[2]-= 0.25;
       }
       else
       {
         headd.pos[2]-= 0.3;
         bodyy.pos[2]-= 0.3;
+        dogg.pos[2]-= 0.3;
+        policebodyy.pos[2]-= 0.25;
+        policeheadd.pos[2]-= 0.25;
       }
     }
 
@@ -337,9 +352,6 @@ function main() {
         {
           bodyy.pos[1] -= 0.2;
           headd.pos[1] -= 0.2;
-          // console.log(bodyy.pos[1]);
-          // console.log(headd.pos[1]);
-          // flagDescend = 0;
         }
       }
       else
@@ -358,6 +370,9 @@ function main() {
       {
         bodyy.pos[0] += 14/3;
         headd.pos[0] += 14/3;
+        policebodyy.pos[0] += 14/3;
+        policeheadd.pos[0] += 14/3;
+        dogg.pos[0] += 14/3;
       }
     });
     Mousetrap.bind('left', function() { 
@@ -365,6 +380,9 @@ function main() {
       {
         bodyy.pos[0] -= 14/3;
         headd.pos[0] -= 14/3;
+        policebodyy.pos[0] -= 14/3;
+        policeheadd.pos[0] -= 14/3;
+        dogg.pos[0] -= 14/3;
       }
     });
     
@@ -523,6 +541,9 @@ function drawScene(gl, programInfo, deltaTime) {
     speedBreaker.drawBreaker(gl, viewProjectionMatrix, programInfo, deltaTime);    
     bodyy.drawBody(gl, viewProjectionMatrix, programInfo, deltaTime);
     headd.drawHead(gl, viewProjectionMatrix, programInfo, deltaTime);
+    policebodyy.drawPolicebody(gl, viewProjectionMatrix, programInfo, deltaTime);
+    policeheadd.drawPolicehead(gl, viewProjectionMatrix, programInfo, deltaTime);
+    dogg.drawDog(gl, viewProjectionMatrix, programInfo, deltaTime);
     hazard.drawHazardboards(gl, viewProjectionMatrix, programInfo, deltaTime);
     if(flagCoin == 0)
     {

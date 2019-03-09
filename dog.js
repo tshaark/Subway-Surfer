@@ -1,14 +1,13 @@
 /// <reference path="webgl.d.ts" />
 
-let jetpack = class {
+let dog = class {
     constructor(gl, pos) {
         this.positionBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
-
+        this.flagRot = 1;
         this.positions = [];
         var n=40;
-        var r1=0.2;
-        var r2=0.0;
+        var r=0.3;
         var M_PI=Math.PI;
         // var g_vertex_buffer_data[9*n+9];
         for ( i = 0; i < n; i++)
@@ -19,57 +18,57 @@ let jetpack = class {
             var y1=Math.sin(angle1);
             var x2=Math.cos(angle2);
             var y2=Math.sin(angle2);
-            this.positions.push(r2*x1);
-            this.positions.push(1.5);
-            this.positions.push(r2*y1);
+            this.positions.push(r*x1);
+            this.positions.push(r*y1);
+            this.positions.push(0.4);
 
-            this.positions.push(r2*x2);
-            this.positions.push(1.5);
-            this.positions.push(r2*y2);
+            this.positions.push(r*x2);
+            this.positions.push(r*y2);
+            this.positions.push(0.4);
 
-            this.positions.push(r1*x1);
-            this.positions.push(0.0);
-            this.positions.push(r1*y1);
+            this.positions.push(r*x1);
+            this.positions.push(r*y1);
+            this.positions.push(-0.4);
             
             
-            this.positions.push(r1*x1);
-            this.positions.push(0.0);
-            this.positions.push(r1*y1);
+            this.positions.push(r*x1);
+            this.positions.push(r*y1);
+            this.positions.push(-0.4);
             
-            this.positions.push(r1*x2);
-            this.positions.push(0.0);
-            this.positions.push(r1*y2);
+            this.positions.push(r*x2);
+            this.positions.push(r*y2);
+            this.positions.push(-0.4);
             
-            this.positions.push(r2*x2);
-            this.positions.push(1.5);
-            this.positions.push(r2*y2);
+            this.positions.push(r*x2);
+            this.positions.push(r*y2);
+            this.positions.push(0.4);
 
            
             this.positions.push(0.0);
             this.positions.push(0.0);
-            this.positions.push(0.0);
+            this.positions.push(-0.4);
 
-            this.positions.push(r1*x1);
-            this.positions.push(0.0);
-            this.positions.push(r1*x1);
+            this.positions.push(r*x1);
+            this.positions.push(r*y1);
+            this.positions.push(-0.4);
             
-            this.positions.push(r1*x2);
-            this.positions.push(0.0);
-            this.positions.push(r1*y2);
+            this.positions.push(r*x2);
+            this.positions.push(r*y2);
+            this.positions.push(-0.4);
 
             
             
             this.positions.push(0.0);
-            this.positions.push(1.0);
             this.positions.push(0.0);
+            this.positions.push(0.4);
 
-            this.positions.push(r2*x1);
-            this.positions.push(1.5);
-            this.positions.push(r2*y1);
+            this.positions.push(r*x1);
+            this.positions.push(r*y1);
+            this.positions.push(0.4);
 
-            this.positions.push(r2*x2);
-            this.positions.push(1.5);
-            this.positions.push(r2*y2);           
+            this.positions.push(r*x2);
+            this.positions.push(r*y2);
+            this.positions.push(0.4);           
         } 
         this.rotation = 0;
 
@@ -138,55 +137,55 @@ let jetpack = class {
             var x2=Math.cos(angle2);
             var y2=Math.sin(angle2);
             this.vertexNormals.push(0.0);
-            this.vertexNormals.push(1.0);
-            this.vertexNormals.push(0.0);
-            
             this.vertexNormals.push(0.0);
             this.vertexNormals.push(1.0);
-            this.vertexNormals.push(0.0);
             
             this.vertexNormals.push(0.0);
-            this.vertexNormals.push(-1.0);
-            this.vertexNormals.push(0.0);
-            
-            
-            this.vertexNormals.push(0.0);
-            this.vertexNormals.push(-1.0);
-            this.vertexNormals.push(0.0);
-            
-            this.vertexNormals.push(0.0);
-            this.vertexNormals.push(-1.0);
-            this.vertexNormals.push(0.0);
-            
             this.vertexNormals.push(0.0);
             this.vertexNormals.push(1.0);
+            
             this.vertexNormals.push(0.0);
-            
-            
             this.vertexNormals.push(0.0);
             this.vertexNormals.push(-1.0);
-            this.vertexNormals.push(0.0);
             
+            
+            this.vertexNormals.push(0.0);
             this.vertexNormals.push(0.0);
             this.vertexNormals.push(-1.0);
-            this.vertexNormals.push(0.0);
             
+            this.vertexNormals.push(0.0);
             this.vertexNormals.push(0.0);
             this.vertexNormals.push(-1.0);
+            
             this.vertexNormals.push(0.0);
-            
-            
             this.vertexNormals.push(0.0);
             this.vertexNormals.push(1.0);
-            this.vertexNormals.push(0.0);
             
+            
+            this.vertexNormals.push(0.0);
+            this.vertexNormals.push(0.0);
+            this.vertexNormals.push(-1.0);
+            
+            this.vertexNormals.push(0.0);
+            this.vertexNormals.push(0.0);
+            this.vertexNormals.push(-1.0);
+            
+            this.vertexNormals.push(0.0);
+            this.vertexNormals.push(0.0);
+            this.vertexNormals.push(-1.0);
+            
+            
+            this.vertexNormals.push(0.0);
             this.vertexNormals.push(0.0);
             this.vertexNormals.push(1.0);
-            this.vertexNormals.push(0.0);
             
+            this.vertexNormals.push(0.0);
+            this.vertexNormals.push(0.0);
+            this.vertexNormals.push(1.0);
+            
+            this.vertexNormals.push(0.0);
             this.vertexNormals.push(0.0);
             this.vertexNormals.push(1.0);           
-            this.vertexNormals.push(0.0);
         } 
 
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertexNormals),
@@ -202,7 +201,7 @@ let jetpack = class {
 
     }
 
-    drawJetpack(gl, projectionMatrix, programInfo, deltaTime) {   
+    drawDog(gl, projectionMatrix, programInfo, deltaTime) {   
         const modelViewMatrix = mat4.create();
         mat4.translate(
             modelViewMatrix,
@@ -215,7 +214,7 @@ let jetpack = class {
         mat4.rotate(modelViewMatrix,
             modelViewMatrix,
             this.rotation,
-            [1, 1, 0]);
+            [0, 1, 0]);
             
         
         {
@@ -293,7 +292,7 @@ let jetpack = class {
         gl.activeTexture(gl.TEXTURE0);
 
         // Bind the texture to texture unit 0
-        gl.bindTexture(gl.TEXTURE_2D, textureJetpack);
+        gl.bindTexture(gl.TEXTURE_2D, textureDog);
         
         // Tell the shader we bound the texture to texture unit 0
         gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
@@ -303,7 +302,22 @@ let jetpack = class {
             // gl.drawElements(gl.TRIANGLES, 3*n, type, offset);
             gl.drawArrays(gl.TRIANGLES, 0,this.positions.length/3);
         }
-        this.rotation += 0.05;
+        if(this.flagRot == 1)
+        {
+            this.rotation -= 0.05;
+            if(this.rotation == -0.1)
+            {
+                this.flagRot = 0;
+            }
+        }
+        else
+        {
+            this.rotation += 0.05;
+            if(this.rotation == 0.1)
+            {
+                this.flagRot = 1;
+            }
+        }
 
     }
 };
