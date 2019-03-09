@@ -1,15 +1,41 @@
 /// <reference path="webgl.d.ts" />
 
-let track = class {
+let breaker = class {
     constructor(gl, pos) {
         this.positionBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
 
         this.positions = [
-            7/3,0.0,0.0,
-            7/3,0.0,-50.0,
-            -7/3,0.0,-50.0,
-            -7/3,0.0,0.0
+             // Front face
+             -1.2, -0.3,  0.8,
+              1.2, -0.3,  0.8,
+              1.2,  0.3,  0.8,
+             -1.2,  0.3,  0.8,
+             //Back Face
+             -1.2, -0.3, -0.8,
+              1.2, -0.3, -0.8,
+              1.2,  0.3, -0.8,
+             -1.2,  0.3, -0.8,
+             //Top Face
+             -1.2,  0.3, -0.8,
+              1.2,  0.3, -0.8,
+              1.2,  0.3,  0.8,
+             -1.2,  0.3,  0.8,
+             //Bottom Face
+             -1.2, -0.3, -0.8,
+              1.2, -0.3, -0.8,
+              1.2, -0.3,  0.8,
+             -1.2, -0.3,  0.8,
+             //Left Face
+             -1.2, -0.3, -0.8,
+             -1.2,  0.3, -0.8,
+             -1.2,  0.3,  0.8,
+             -1.2, -0.3,  0.8,
+             //Right Face
+              1.2, -0.3, -0.8,
+              1.2,  0.3, -0.8,
+              1.2,  0.3,  0.8,
+              1.2, -0.3,  0.8,
         ];
 
         this.rotation = 0;
@@ -17,7 +43,7 @@ let track = class {
         this.pos = pos;
 
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.positions), gl.STATIC_DRAW);
-        
+    
         const indexBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
 
@@ -27,6 +53,11 @@ let track = class {
 
         const indices = [
             0, 1, 2,    0, 2, 3, // front
+            4, 5, 6,    4, 6, 7,
+            8, 9, 10,   8, 10, 11,
+            12, 13, 14, 12, 14, 15,
+            16, 17, 18, 16, 18, 19,
+            20, 21, 22, 20, 22, 23, 
         ];
 
         // Now send the element array to GL
@@ -43,6 +74,31 @@ let track = class {
               1.0,  0.0,
               1.0,  1.0,
               0.0,  1.0,
+              // Back
+              0.0,  0.0,
+              1.0,  0.0,
+              1.0,  1.0,
+              0.0,  1.0,
+              // Top
+              0.0,  0.0,
+              1.0,  0.0,
+              1.0,  1.0,
+              0.0,  1.0,
+              // Bottom
+              0.0,  0.0,
+              1.0,  0.0,
+              1.0,  1.0,
+              0.0,  1.0,
+              // Right
+              0.0,  0.0,
+              1.0,  0.0,
+              1.0,  1.0,
+              0.0,  1.0,
+              // Left
+              0.0,  0.0,
+              1.0,  0.0,
+              1.0,  1.0,
+              0.0,  1.0,
             ];
           
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoordinates),
@@ -51,27 +107,50 @@ let track = class {
             this.normalBuffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
             this.vertexNormals = [
+                0,0,1.0,
+                0,0,1.0,
+                0,0,1.0,
+                0,0,1.0,
+
+                0,0,-1.0,
+                0,0,-1.0,
+                0,0,-1.0,
+                0,0,-1.0,
+
                 0,1.0,0,
                 0,1.0,0,
                 0,1.0,0,
                 0,1.0,0,
+
+                0,-1.0,0,
+                0,-1.0,0,
+                0,-1.0,0,
+                0,-1.0,0,
+
+                -1.0,0,0,
+                -1.0,0,0,
+                -1.0,0,0,
+                -1.0,0,0,
+
+                -1.0,0,0,
+                -1.0,0,0,
+                -1.0,0,0,
+                -1.0,0,0,
 
             ];
 
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertexNormals),
                         gl.STATIC_DRAW);
 
-
         this.buffer = {
             position: this.positionBuffer,
             textureCoord: textureCoordBuffer,
             indices: indexBuffer,
             normals: this.normalBuffer,
-        }
-
+        }              
     }
 
-    drawTrack(gl, projectionMatrix, programInfo, deltaTime) {
+    drawBreaker(gl, projectionMatrix, programInfo, deltaTime) {
         const modelViewMatrix = mat4.create();
         mat4.translate(
             modelViewMatrix,
@@ -103,8 +182,6 @@ let track = class {
             gl.enableVertexAttribArray(
                 programInfo.attribLocations.vertexPosition);
         }
-
-
         {
             const num = 2; // every coordinate composed of 2 values
             const type = gl.FLOAT; // the data in the buffer is 32 bit float
@@ -115,26 +192,26 @@ let track = class {
             gl.vertexAttribPointer(programInfo.attribLocations.textureCoord, num, type, normalize, stride, offset);
             gl.enableVertexAttribArray(programInfo.attribLocations.textureCoord);
         }
-        // {
-        //     const nums = 3;
-        //     const type = gl.FLOAT;
-        //     const normalize = false;
-        //     const stride = 0;
-        //     const offset = 0;
-        //     gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer.normals);
-        //     gl.vertexAttribPointer(
-        //         programInfo.attribLocations.vertexNormal,
-        //         nums,
-        //         type,
-        //         normalize,
-        //         stride,
-        //         offset);
-        //     gl.enableVertexAttribArray(
-        //         programInfo.attribLocations.vertexNormal);
-        // }
-        // const normalMatrix = mat4.create();
-        // mat4.invert(normalMatrix, modelViewMatrix);
-        // mat4.transpose(normalMatrix, normalMatrix);
+        {
+            const nums = 3;
+            const type = gl.FLOAT;
+            const normalize = false;
+            const stride = 0;
+            const offset = 0;
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer.normals);
+            gl.vertexAttribPointer(
+                programInfo.attribLocations.vertexNormal,
+                nums,
+                type,
+                normalize,
+                stride,
+                offset);
+            gl.enableVertexAttribArray(
+                programInfo.attribLocations.vertexNormal);
+        }
+        const normalMatrix = mat4.create();
+        mat4.invert(normalMatrix, modelViewMatrix);
+        mat4.transpose(normalMatrix, normalMatrix);
 
         
         // Tell WebGL which indices to use to index the vertices
@@ -155,20 +232,20 @@ let track = class {
             false,
             modelViewMatrix);
             gl.activeTexture(gl.TEXTURE0);
-        // gl.uniformMatrix4fv(
-        //     programInfo.uniformLocations.normalMatrix,
-        //     false,
-        //     normalMatrix);
-        
+        gl.uniformMatrix4fv(
+            programInfo.uniformLocations.normalMatrix,
+            false,
+            normalMatrix);
+            gl.activeTexture(gl.TEXTURE0);
 
             // Bind the texture to texture unit 0
-            gl.bindTexture(gl.TEXTURE_2D, textureTrack);
+            gl.bindTexture(gl.TEXTURE_2D, textureBreaker);
           
             // Tell the shader we bound the texture to texture unit 0
             gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
 
         {
-            const vertexCount = 6;
+            const vertexCount = 36;
             const type = gl.UNSIGNED_SHORT;
             const offset = 0;
             gl.drawElements(gl.TRIANGLES, vertexCount, type, offset);

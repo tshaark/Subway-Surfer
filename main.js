@@ -1,16 +1,16 @@
 var cubeRotation = 0.0;
 
-var c;
-var c1;
-var coin,hazard;
+var headd,bodyy,legL,legR;
+var c1,flag=0,upVelocity = 1.0;
+var coin,hazard,speedBreaker;
 var wallL = new Array();
 var wallR = new Array();
 var cont = new Array();
 var track1 = new Array();
 var track2 = new Array();
 var track3 = new Array();
-var playerX=0.0,playerY=1.0,playerZ=-10.0;
-var textureCube,textureWall,textureTrack,textureContainer,textureCoin,textureHazard;
+var playerX=0.0,playerY=0.0,playerZ=-10.0;
+var textureCube,textureWall,textureTrack,textureContainer,textureCoin,textureHazard,textureBreaker,textureHead;
 var i=0;
 main();
 
@@ -19,20 +19,23 @@ main();
 //
 
 
-
 function main() {
 
 
   const canvas = document.querySelector('#glcanvas');
   const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-  textureCube = loadTexture(gl, 'surfer.png');
+  textureBody = loadTexture(gl, 'body.jpg');
   textureWall = loadTexture(gl, 'wall1.jpeg');
   textureTrack = loadTexture(gl, 'tr.png');
   textureContainer = loadTexture(gl, 'container.png');
   textureCoin = loadTexture(gl, 'coin.png');
   textureHazard = loadTexture(gl, 'hazad.png');
+  textureBreaker = loadTexture(gl, 'breaker.jpeg');
+  textureHead = loadTexture(gl, 'head.jpeg');
 
-  c = new cube(gl, [playerX, playerY, playerZ]);
+  bodyy = new body(gl, [playerX, playerY, playerZ]);
+  headd = new head(gl, [playerX, playerY+1.0, playerZ]);
+  speedBreaker = new breaker(gl, [0.0, 0.3, -40.0]);
   for(i=0;i<50;i++)
   {
     var a = Math.floor(Math.random() * 101);
@@ -149,33 +152,49 @@ function main() {
     const deltaTime = now - then;
     then = now;
     drawScene(gl, programInfo, deltaTime);
-    c.pos[2]-= 0.2;
+    if(coin.pos[0]==bodyy.pos[0] && coin.pos[0]==bodyy.pos[0] && coin.pos[0]==bodyy.pos[0])
+    {
+      console.log("loda");
+    }
+    
+    bodyy.pos[2]-= 0.2;
+    headd.pos[2]-= 0.2;
     Mousetrap.bind('right', function() { 
-      if(c.pos[0]<14/3)
+      if(bodyy.pos[0]<14/3)
       {
-        c.pos[0] += 14/3;
+        bodyy.pos[0] += 14/3;
+        headd.pos[0] += 14/3;
       }
     });
     Mousetrap.bind('left', function() { 
-      if(c.pos[0]>-14/3)
+      if(bodyy.pos[0]>-14/3)
       {
-        c.pos[0] -= 14/3;
+        bodyy.pos[0] -= 14/3;
+        headd.pos[0] -= 14/3;
       }
     });
     
     Mousetrap.bind('up', function() { 
-      if(c.pos[1] > 0)
+      if(flag == 0) 
       {
-        if(c.pos[1]<=5.0){
-          c.pos[1] += 4.0;
-        }
+        flag = 1;
       }
     });
-    if(c.pos[1] > 1)
+    if(flag == 1)
     {
-      c.pos[1]-=0.1633;
+      bodyy.pos[1]+=upVelocity;
+      headd.pos[1]+=upVelocity;
+      upVelocity -= 0.16;
+      if(bodyy.pos[1] <= 0.2)
+      {
+        bodyy.pos[1]=0;
+        headd.pos[1]=1.0;
+        flag = 0;
+        upVelocity = 1.0;
+      }
     }
-    // console.log(c.pos[1]);
+    console.log(bodyy.pos[1]);
+    // console.log(bodyy.pos[1]);
     requestAnimationFrame(render);
 
   }
@@ -219,7 +238,7 @@ function drawScene(gl, programInfo, deltaTime) {
   // Set the drawing position to the "identity" point, which is
   // the center of the scene.
     var cameraMatrix = mat4.create();
-    mat4.translate(cameraMatrix, cameraMatrix, [0.0, 3.0, c.pos[2]+10.0]);
+    mat4.translate(cameraMatrix, cameraMatrix, [0.0, 3.0, bodyy.pos[2]+10.0]);
     var cameraPosition = [
       cameraMatrix[12],
       cameraMatrix[13],
@@ -228,7 +247,7 @@ function drawScene(gl, programInfo, deltaTime) {
 
     var up = [0, 1, 0];
 
-    mat4.lookAt(cameraMatrix, cameraPosition, [0.0,1.0,c.pos[2]], up);
+    mat4.lookAt(cameraMatrix, cameraPosition, [0.0,1.0,bodyy.pos[2]], up);
 
     var viewMatrix = cameraMatrix;//mat4.create();
 
@@ -237,20 +256,21 @@ function drawScene(gl, programInfo, deltaTime) {
     var viewProjectionMatrix = mat4.create();
     
     mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
-    
-    c.drawCube(gl, viewProjectionMatrix, programInfo, deltaTime);
-    for(i=0;i<100;i++)
-    {
-      wallL[i].drawWall(gl, viewProjectionMatrix, programInfo, deltaTime);
-      wallR[i].drawWall(gl, viewProjectionMatrix, programInfo, deltaTime);
-    }
-    hazard.drawHazardboards(gl, viewProjectionMatrix, programInfo, deltaTime);
-    coin.drawCoins(gl, viewProjectionMatrix, programInfo, deltaTime);
     for(i=0;i<100;i++)
     {
       track1[i].drawTrack(gl, viewProjectionMatrix, programInfo, deltaTime);
       track2[i].drawTrack(gl, viewProjectionMatrix, programInfo, deltaTime);
       track3[i].drawTrack(gl, viewProjectionMatrix, programInfo, deltaTime);
+    }
+    speedBreaker.drawBreaker(gl, viewProjectionMatrix, programInfo, deltaTime);    
+    bodyy.drawBody(gl, viewProjectionMatrix, programInfo, deltaTime);
+    headd.drawHead(gl, viewProjectionMatrix, programInfo, deltaTime);
+    hazard.drawHazardboards(gl, viewProjectionMatrix, programInfo, deltaTime);
+    coin.drawCoins(gl, viewProjectionMatrix, programInfo, deltaTime);
+    for(i=0;i<100;i++)
+    {
+      wallL[i].drawWall(gl, viewProjectionMatrix, programInfo, deltaTime);
+      wallR[i].drawWall(gl, viewProjectionMatrix, programInfo, deltaTime);
     }
     for(i=0;i<50;i++)
     {
