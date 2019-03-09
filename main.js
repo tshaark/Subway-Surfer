@@ -1,7 +1,7 @@
 var cubeRotation = 0.0;
 var time = 0;
 var headd,bodyy,legL,legR;
-var c1,flag=0,upVelocity = 1.0,flagCoin = 0;
+var c1,flag=0,upVelocity = 1.0,flagCoin = 0,flagSlide = 0,timeSlide = 0;
 var coin,hazard,speedBreaker;
 var wallL = new Array();
 var wallR = new Array();
@@ -12,6 +12,7 @@ var track3 = new Array();
 var playerX=0.0,playerY=0.0,playerZ=-10.0;
 var textureCube,textureWall,textureTrack,textureContainer,textureCoin,textureHazard,textureBreaker,textureHead;
 var i=0;
+var aboveTrain = 0;
 main();
 
 //
@@ -64,7 +65,7 @@ function main() {
     track3.push(new track(gl,[-14/3,0.0,-i*50]));
   }
   coin = new coins(gl, [0.0,1.2,-30.0]);
-  hazard = new hazardboards(gl, [14/3,2.2,-10.0]);
+  hazard = new hazardboards(gl, [14/3,2.2,-50.0]);
   
   if (!gl) {
     alert('Unable to initialize WebGL. Your browser or machine may not support it.');
@@ -143,19 +144,10 @@ function main() {
   // Here's where we call the routine that builds all the
   // objects we'll be drawing.
 
-  // var boundin_box_coin = {
-  //   x : ,
-  //   y : ,
-  //   z : ,
-  //   len : ,
-  //   widht : ,
-  //   height : ,
-  // };
-  //const buffers
-
   var then = 0;
 
   // Draw the scene repeatedly
+  
   function render(now) {
     now *= 0.001;  // convert to seconds
     const deltaTime = now - then;
@@ -172,10 +164,46 @@ function main() {
     {
       coin.pos[2] -= 50.0;
     }
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+    for(i=0; i<50 ; i++)
+    {
+      var x1 = cont[i].pos[0];
+      var y1 = cont[i].pos[1];
+      var z1 = cont[i].pos[2];
+
+      if(x - x1 <= 1.2 && x - x1 >= -1.2 && z - z1 <= 4.0 && z - z1 >= -4.0 && y - y1 <= 2.0 && y - y1 >= 1.5)
+      {
+        aboveTrain = 1;
+        break;
+      }
+      else if(x - x1 <= 1.2 && x - x1 >= -1.2 && z - z1 <= 4.0 && z - z1 >= -4.0 && y - y1 <= 1.5)
+      {
+        alert("GAME OVER");
+        // break;
+      }
+      else
+      {
+        aboveTrain = 0;
+      }
+    }
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+    //later convert into loops for multiple hazard boards
+    var x1 = hazard.pos[0];
+    var y1 = hazard.pos[1];
+    var z1 = hazard.pos[2];
+    if(x1 - x <= 0.6 && x1 - x >= -0.6 && z1 - z >= -0.2 && z1 - z <= 0.2 && y1 - y <= 2.2 && y1 - y >= -1.2)
+    {
+      alert("game over");
+    }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////////
-    
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+   
+
 
     //convert into loop later for multiple speedbreakers
     if(speedBreaker.pos[0] == x && speedBreaker.pos[1] == y)
@@ -201,13 +229,32 @@ function main() {
     }
     else
     {
-      bodyy.pos[2]-= 0.2;
-      headd.pos[2]-= 0.2;
+      bodyy.pos[2]-= 0.3;
+      headd.pos[2]-= 0.3;
     }
 
-//////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+    Mousetrap.bind('down', function() { 
+      if(flagSlide == 0) 
+      {
+        flagSlide = 1;
+        bodyy.pos[1] -= 0.3;
+        headd.pos[1] -= 0.3;
+      }
+    });
+    if(flagSlide)
+    {
+      timeSlide++;
+      if(timeSlide >= 30)
+      {
+        flagSlide = 0;
+        timeSlide = 0;
+        bodyy.pos[1] += 0.3;
+        headd.pos[1] += 0.3;
+      }
+    }
     Mousetrap.bind('right', function() { 
       if(bodyy.pos[0]<14/3)
       {
@@ -229,12 +276,12 @@ function main() {
         flag = 1;
       }
     });
-    if(flag == 1)
+    if(flag == 1 && aboveTrain == 0)
     {
       bodyy.pos[1]+=upVelocity;
       headd.pos[1]+=upVelocity;
-      upVelocity -= 0.16;
-      if(bodyy.pos[1] <= 0.2)
+      upVelocity -= 0.1;
+      if(bodyy.pos[1] <= 0.0)
       {
         bodyy.pos[1]=0;
         headd.pos[1]=1.0;
@@ -242,6 +289,7 @@ function main() {
         upVelocity = 1.0;
       }
     }
+
  ///////////////////////////////////////////////////////////////////////////////////////////////
 
 
