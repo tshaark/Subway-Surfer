@@ -1,8 +1,8 @@
 var cubeRotation = 0.0;
 var time = 0;
 var headd,bodyy,legL,legR;
-var c1,flag=0,upVelocity = 1.0,flagCoin = 0,flagSlide = 0,timeSlide = 0;
-var coin,hazard,speedBreaker,bootup,bootdown;
+var c1,flag=0,upVelocity = 1.0,upVelocity1 = 1.5,flagCoin = 0,flagSlide = 0,timeSlide = 0,flagShoe = 0,timeShoe = 0,flagJet = 0,timeJet = 0,flagDescend = 0;
+var coin,hazard,speedBreaker,bootup,bootdown,jetpackk;
 var wallL = new Array();
 var wallR = new Array();
 var cont = new Array();
@@ -10,7 +10,7 @@ var track1 = new Array();
 var track2 = new Array();
 var track3 = new Array();
 var playerX=0.0,playerY=0.0,playerZ=-10.0;
-var textureCube,textureWall,textureTrack,textureContainer,textureCoin,textureHazard,textureBreaker,textureHead,textureBootsup,textureBootsdown;
+var textureCube,textureWall,textureTrack,textureContainer,textureCoin,textureHazard,textureBreaker,textureHead,textureBootsup,textureBootsdown,textureJetpack;
 var i=0;
 var aboveTrain = 0;
 var programInfo;
@@ -36,12 +36,14 @@ function main() {
   textureHead = loadTexture(gl, 'head.jpeg');
   textureBootsup = loadTexture(gl, 'bootsup.png');
   textureBootsdown = loadTexture(gl, 'bootsdown.jpeg');
+  textureJetpack = loadTexture(gl, 'jetpack.jpeg');
 
   bodyy = new body(gl, [playerX, playerY, playerZ]);
   headd = new head(gl, [playerX, playerY+1.0, playerZ]);
-  bootup = new bootsup(gl, [0.0, 1.0, -20 + 0.8])
-  bootdown = new bootsdown(gl, [0.0, 0.4, -20.0 ])
+  bootup = new bootsup(gl, [-0.6, 0.4 + 0.6, -20.0]);
+  bootdown = new bootsdown(gl, [0.0, 0.4, -20.0 ]);
   speedBreaker = new breaker(gl, [0.0, 0.0, -40.0]);
+  jetpackk = new jetpack(gl, [0.0, 1.0, -40.0]);
   for(i=0;i<50;i++)
   {
     var a = Math.floor(Math.random() * 101);
@@ -172,8 +174,7 @@ function main() {
 
   var then = 0;
 
-  // Draw the scene repeatedly
-  
+  // Draw the scene repeatedly  
   function render(now) {
     now *= 0.001;  // convert to seconds
     const deltaTime = now - then;
@@ -206,7 +207,6 @@ function main() {
       else if(x - x1 <= 1.2 && x - x1 >= -1.2 && z - z1 <= 4.0 && z - z1 >= -4.0 && y - y1 <= 1.5)
       {
         alert("GAME OVER");
-        // break;
       }
       else
       {
@@ -224,12 +224,31 @@ function main() {
     {
       alert("game over");
     }
+///////////////////////////////////////////////////////////////////////////////////////////////
 
+    //later convert into loops for multiple boots
+    var x1 = bootdown.pos[0];
+    var y1 = bootdown.pos[1];
+    var z1 = bootdown.pos[2];
+    if(x1 - x <= 1.0 && x1 - x >= -1.0 && z1 - z >= -0.4 && z1 - z <= 0.4 && y1 - y <= 0.4 && y1 - y >= -0.4)
+    {
+      flagShoe = 1;
+    }
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+    //later convert into loops for multiple jetpacks
+    var x1 = jetpackk.pos[0];
+    var y1 = jetpackk.pos[1];
+    var z1 = jetpackk.pos[2];
+    if(x1 - x <= 0.2 && x1 - x >= -0.2 && z1 - z >= -0.2 && z1 - z <= 0.2 && y1 - y <= 1.0 && y1 - y >= -1.5)
+    {
+      console.log("bt");
+      flagJet = 1;
+    }
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-   
-
 
     //convert into loop later for multiple speedbreakers
     if(speedBreaker.pos[0] == x && speedBreaker.pos[1] == y)
@@ -255,8 +274,16 @@ function main() {
     }
     else
     {
-      bodyy.pos[2]-= 0.3;
-      headd.pos[2]-= 0.3;
+      if(flagShoe || flagJet)
+      {
+        headd.pos[2]-= 0.4;
+        bodyy.pos[2]-= 0.4;
+      }
+      else
+      {
+        headd.pos[2]-= 0.3;
+        bodyy.pos[2]-= 0.3;
+      }
     }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -281,6 +308,51 @@ function main() {
         headd.pos[1] += 0.3;
       }
     }
+    if(flagShoe)
+    {
+      timeShoe++;
+      if(timeShoe >= 200)
+      {
+        flagShoe = 0;
+        timeShoe = 0;
+      }
+    }
+    if(flagJet)
+    {
+      if(bodyy.pos[1] < 10.0 && flagDescend == 0)
+      {
+          bodyy.pos[1] += 0.2;
+          headd.pos[1] += 0.2;
+      }
+      else if(flagDescend)
+      {
+        if(bodyy.pos[1] <= 0)
+        {
+          bodyy.pos[1] = 0;
+          headd.pos[1] = 1.0;
+          flagDescend = 0;
+          flagJet = 0;
+        }
+        else
+        {
+          bodyy.pos[1] -= 0.2;
+          headd.pos[1] -= 0.2;
+          // console.log(bodyy.pos[1]);
+          // console.log(headd.pos[1]);
+          // flagDescend = 0;
+        }
+      }
+      else
+      { 
+        timeJet++;
+        if(timeJet >= 120)
+        {
+          flagDescend = 1;
+          timeJet = 0;
+        }
+      }
+      
+    }
     Mousetrap.bind('right', function() { 
       if(bodyy.pos[0]<14/3)
       {
@@ -304,15 +376,31 @@ function main() {
     });
     if(flag == 1 && aboveTrain == 0)
     {
-      bodyy.pos[1]+=upVelocity;
-      headd.pos[1]+=upVelocity;
-      upVelocity -= 0.1;
-      if(bodyy.pos[1] <= 0.0)
+      if(flagShoe)
       {
-        bodyy.pos[1]=0;
-        headd.pos[1]=1.0;
-        flag = 0;
-        upVelocity = 1.0;
+        bodyy.pos[1]+=upVelocity1;
+        headd.pos[1]+=upVelocity1;
+        upVelocity1 -= 0.08;
+        if(bodyy.pos[1] <= 0.0)
+        {
+          bodyy.pos[1]=0;
+          headd.pos[1]=1.0;
+          flag = 0;
+          upVelocity1 = 1.5;
+        }
+      }
+      else
+      {
+        bodyy.pos[1]+=upVelocity;
+        headd.pos[1]+=upVelocity;
+        upVelocity -= 0.1;
+        if(bodyy.pos[1] <= 0.0)
+        {
+          bodyy.pos[1]=0;
+          headd.pos[1]=1.0;
+          flag = 0;
+          upVelocity = 1.0;
+        }
       }
     }
     Mousetrap.bind('g', function() { 
@@ -395,7 +483,14 @@ function drawScene(gl, programInfo, deltaTime) {
   // Set the drawing position to the "identity" point, which is
   // the center of the scene.
     var cameraMatrix = mat4.create();
-    mat4.translate(cameraMatrix, cameraMatrix, [0.0, 3.0, bodyy.pos[2]+10.0]);
+    if(flagJet)
+    {
+      mat4.translate(cameraMatrix, cameraMatrix, [0.0, 3.0+bodyy.pos[1], bodyy.pos[2]+10.0]);
+    }
+    else
+    {
+      mat4.translate(cameraMatrix, cameraMatrix, [0.0, 3.0, bodyy.pos[2]+10.0]);
+    }
     var cameraPosition = [
       cameraMatrix[12],
       cameraMatrix[13],
@@ -403,8 +498,14 @@ function drawScene(gl, programInfo, deltaTime) {
     ];
 
     var up = [0, 1, 0];
-
-    mat4.lookAt(cameraMatrix, cameraPosition, [0.0,1.0,bodyy.pos[2]], up);
+    if(flagJet)
+    {
+      mat4.lookAt(cameraMatrix, cameraPosition, [0.0,1.0+bodyy.pos[1],bodyy.pos[2]], up);
+    }
+    else
+    {
+      mat4.lookAt(cameraMatrix, cameraPosition, [0.0,1.0,bodyy.pos[2]], up);
+    }
 
     var viewMatrix = cameraMatrix;//mat4.create();
 
@@ -432,12 +533,16 @@ function drawScene(gl, programInfo, deltaTime) {
       wallL[i].drawWall(gl, viewProjectionMatrix, programInfo, deltaTime);
       wallR[i].drawWall(gl, viewProjectionMatrix, programInfo, deltaTime);
     }
+    jetpackk.drawJetpack(gl, viewProjectionMatrix, programInfo, deltaTime);
     for(i=0;i<50;i++)
     {
       cont[i].drawContainer(gl, viewProjectionMatrix, programInfo, deltaTime);
     }
-    bootup.drawBootsup(gl, viewProjectionMatrix, programInfo, deltaTime);
-    bootdown.drawBootsdown(gl, viewProjectionMatrix, programInfo, deltaTime);
+    if(flagShoe == 0)
+    {
+      bootup.drawBootsup(gl, viewProjectionMatrix, programInfo, deltaTime);
+      bootdown.drawBootsdown(gl, viewProjectionMatrix, programInfo, deltaTime);
+    }
 }
 
 //
