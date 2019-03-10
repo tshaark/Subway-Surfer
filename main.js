@@ -2,16 +2,21 @@ var cubeRotation = 0.0;
 var time = 0;
 var headd,bodyy,legL,legR,policeheadd,policebodyy,dogg;
 var c1,flag=0,upVelocity = 1.0,upVelocity1 = 1.5,flagCoin = 0,flagSlide = 0,timeSlide = 0,flagShoe = 0,timeShoe = 0,flagJet = 0,timeJet = 0,flagDescend = 0;
-var coin,hazard,speedBreaker,bootup,bootdown,jetpackk;
+var bootup = [];
+var bootdown = [];
+var coin = [];
+var hazard = [];
+var jetpackk = [];
+var speedBreaker = [];
 var wallL = new Array();
 var wallR = new Array();
-var cont = new Array();
+var cont =  new Array();
 var track1 = new Array();
 var track2 = new Array();
 var track3 = new Array();
 var playerX=0.0,playerY=0.0,playerZ=-10.0;
 var textureCube,textureWall,textureTrack,textureContainer,textureCoin,textureHazard,textureBreaker,textureHead,textureBootsup,textureBootsdown,textureJetpack,texturePolicebody,texturePolicehead,textureDog;
-var i=0;
+var i=0,score = 0;;
 var aboveTrain = 0;
 var programInfo;
 main();
@@ -39,16 +44,65 @@ function main() {
   bodyy = new body(gl, [playerX, playerY, playerZ]);
   headd = new head(gl, [playerX, playerY+1.0, playerZ]);
   dogg = new dog(gl, [playerX + 1.0 , playerY + 0.3, playerZ]);
-
-  bootup = new bootsup(gl, [-0.6, 0.4 + 0.6, -20.0]);
-  bootdown = new bootsdown(gl, [0.0, 0.4, -20.0 ]);
-  speedBreaker = new breaker(gl, [0.0, 0.0, -40.0]);
-  jetpackk = new jetpack(gl, [0.0, 1.0, -50.0]);
   policebodyy = new policebody(gl, [playerX, playerY, playerZ + 2.0]);
   policeheadd = new policehead(gl, [playerX, playerY+1.0, playerZ + 2.0]);
-  
+
   
   for(i=0;i<50;i++)
+  {
+    var a = Math.floor(Math.random() * 101);
+    if(a%2 == 0)
+    {
+      bootup.push( new bootsup(gl, [14/3-0.6,0.4+0.6,-i*60.0]));
+      bootdown.push( new bootsdown(gl, [14/3,0.4,-i*60.0]));
+    }
+    else if(a%3 == 0)
+    {
+      bootup.push( new bootsup(gl, [0.0-0.6,0.4+0.6,-i*70.0]));
+      bootdown.push( new bootsdown(gl, [0.0,0.4,-i*70.0]));
+    }
+    else
+    {
+      bootup.push( new bootsup(gl, [-14/3-0.6,0.4+0.6,-i*80.0]));
+      bootdown.push( new bootsdown(gl, [-14/3,0.4,-i*80.0]));
+    }
+  }
+
+  for(i=0;i<50;i++)
+  {
+    var a = Math.floor(Math.random() * 101);
+    if(a%2 == 0)
+    {
+      speedBreaker.push( new breaker(gl, [14/3,0.0,-i*60.0]));
+    }
+    else if(a%3 == 0)
+    {
+      speedBreaker.push( new breaker(gl, [0.0,0.0,-i*70.0]));
+    }
+    else
+    {
+      speedBreaker.push( new breaker(gl, [-14/3,0.0,-i*80.0]));
+    }
+  }
+  
+  for(i=0;i<20;i++)
+  {
+    var a = Math.floor(Math.random() * 101);
+    if(a%2 == 0)
+    {
+      jetpackk.push( new jetpack(gl, [14/3,1.0,-i*60.0]));
+    }
+    else if(a%3 == 0)
+    {
+      jetpackk.push( new jetpack(gl, [0.0,1.0,-i*70.0]));
+    }
+    else
+    {
+      jetpackk.push( new jetpack(gl, [-14/3,1.0,-i*80.0]));
+    }
+  }
+  
+  for(var i=0;i<50;i++)
   {
     var a = Math.floor(Math.random() * 101);
     if(a%2 == 0)
@@ -64,20 +118,49 @@ function main() {
       cont.push( new container(gl, [-14/3,1.2,-i*80.0]));
     }
   }
-  for(i=0;i<100;i++)
+  
+  for(var i=0;i<100;i++)
   {
     wallL.push(new wall(gl,[7.0,0.0,-i*50]));
     wallR.push(new wall(gl,[-7.0,0.0,-i*50]));
   }
-  for(i=0;i<100;i++)
+  for(var i=0;i<100;i++)
   {
     track1.push(new track(gl,[0.0,0.0,-i*50]));
     track2.push(new track(gl,[14/3,0.0,-i*50]));
     track3.push(new track(gl,[-14/3,0.0,-i*50]));
   }
-  coin = new coins(gl, [0.0,1.2,-30.0]);
-  hazard = new hazardboards(gl, [14/3,2.2,-50.0]);
-  
+  for(var i=0; i<100;i++)
+  {
+    var a = Math.floor(Math.random() * 101);
+    if(a%2 == 0)
+    {
+      coin.push( new coins(gl, [14/3,1.2,-i*50.0]));
+      coin.push( new coins(gl, [14/3,11.2,-i*50.0]));
+    }
+    else if(a%3 == 0)
+    {
+      coin.push( new coins(gl, [0.0,1.2,-i*70.0]));
+      coin.push( new coins(gl, [0.0,11.2,-i*70.0]));
+    }
+    else
+    {
+      coin.push( new coins(gl, [-14/3,1.2,-i*80.0]));
+      coin.push( new coins(gl, [-14/3,11.2,-i*80.0]));
+    }
+  }
+  for(var i=0; i<50;i++)
+  {
+    var a = Math.floor(Math.random() * 101);
+    if(a%2 == 0)
+    {
+      hazard.push( new hazardboards(gl, [14/3,2.2,-i*50.0]));
+    }
+    else
+    {
+      hazard.push( new hazardboards(gl, [-14/3,2.2,-i*80.0]));
+    }
+  }
   if (!gl) {
     alert('Unable to initialize WebGL. Your browser or machine may not support it.');
     return;
@@ -147,11 +230,8 @@ function main() {
 
   // Initialize a shader program; this is where all the lighting
   // for the vertices and so forth is established.
-  // if(flagGray = 0)
-  // {
     const shaderProgram = initShaderProgram(gl, vsSource, fsSource);
     const shaderProgram1 = initShaderProgram(gl, vsSource, fsSource1);
-  // }
 
 
   // Collect all the info needed to use the shader program.
@@ -190,11 +270,15 @@ function main() {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-    //convert into loop later for multiple coins
-    if(Math.sqrt((coin.pos[0]-x)*(coin.pos[0]-x) + (coin.pos[1]-y)*(coin.pos[1]-y) + (coin.pos[2]-z)*(coin.pos[2]-z))<= 1.21)
-    {
-      coin.pos[2] -= 50.0;
-    }
+    coin.forEach(cn => {
+          if(Math.sqrt((cn.pos[0]-x)*(cn.pos[0]-x) + (cn.pos[1]-y)*(cn.pos[1]-y) + (cn.pos[2]-z)*(cn.pos[2]-z))<= 1.21)
+          {
+            cn.pos[2] -= 50.0;
+            score += 10.0;
+          }
+          document.getElementById("score").innerHTML = "SCORE : " + score; 
+        
+    });
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
     for(i=0; i<50 ; i++)
@@ -220,54 +304,64 @@ function main() {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-    //later convert into loops for multiple hazard boards
-    var x1 = hazard.pos[0];
-    var y1 = hazard.pos[1];
-    var z1 = hazard.pos[2];
-    if(x1 - x <= 0.6 && x1 - x >= -0.6 && z1 - z >= -0.2 && z1 - z <= 0.2 && y1 - y <= 2.2 && y1 - y >= -1.2)
-    {
-      alert("game over");
-    }
-///////////////////////////////////////////////////////////////////////////////////////////////
-
-    //later convert into loops for multiple boots
-    var x1 = bootdown.pos[0];
-    var y1 = bootdown.pos[1];
-    var z1 = bootdown.pos[2];
-    if(x1 - x <= 1.0 && x1 - x >= -1.0 && z1 - z >= -0.4 && z1 - z <= 0.4 && y1 - y <= 0.4 && y1 - y >= -0.4)
-    {
-      flagShoe = 1;
-    }
-
-///////////////////////////////////////////////////////////////////////////////////////////////
-
-    //later convert into loops for multiple jetpacks
-    var x1 = jetpackk.pos[0];
-    var y1 = jetpackk.pos[1];
-    var z1 = jetpackk.pos[2];
-    if(x1 - x <= 0.2 && x1 - x >= -0.2 && z1 - z >= -0.2 && z1 - z <= 0.2 && y1 - y <= 1.0 && y1 - y >= -1.5)
-    {
-      console.log("bt");
-      flagJet = 1;
-    }
-
-
-///////////////////////////////////////////////////////////////////////////////////////////////
-
-    //convert into loop later for multiple speedbreakers
-    if(speedBreaker.pos[0] == x && speedBreaker.pos[1] == y)
-    {
-      if( z-speedBreaker.pos[2] <= 0.2 && z-speedBreaker.pos[2] >= -0.2)
-      {
-        if(time == 1)
+    hazard.forEach(hazard => {
+        var x1 = hazard.pos[0];
+        var y1 = hazard.pos[1];
+        var z1 = hazard.pos[2];
+        if(x1 - x <= 0.6 && x1 - x >= -0.6 && z1 - z >= -0.2 && z1 - z <= 0.2 && y1 - y <= 2.2 && y1 - y >= -1.2)
         {
-         alert("GAME OVER");
+          alert("game over");
         }
-        time = 1;
-        policebodyy.pos[2] = bodyy.pos[2] + 2.0;
-        policeheadd.pos[2] = headd.pos[2] + 2.0;
+  });
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+    bootdown.forEach( (bootdown,index) =>{ 
+      var x1 = bootdown.pos[0];
+      var y1 = bootdown.pos[1];
+      var z1 = bootdown.pos[2];
+      if(x1 - x <= 1.0 && x1 - x >= -1.0 && z1 - z >= -0.4 && z1 - z <= 0.4 && y1 - y <= 0.4 && y1 - y >= -0.4)
+      {
+        flagShoe = 1;
+        bootdown.pos[2] -= 100.0;
+        bootup[index].pos[2] -= 100.0;
       }
-    }
+  });
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+    jetpackk.forEach(jetpackk => {
+      var x1 = jetpackk.pos[0];
+      var y1 = jetpackk.pos[1];
+      var z1 = jetpackk.pos[2];
+      if(x1 - x <= 0.2 && x1 - x >= -0.2 && z1 - z >= -0.2 && z1 - z <= 0.2 && y1 - y <= 1.0 && y1 - y >= -1.5)
+      {
+        flagJet = 1;
+        jetpackk.pos[2] -= 150.0;
+      }
+  });
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+    speedBreaker.forEach(speedBreaker => {
+        if(speedBreaker.pos[0] == x && speedBreaker.pos[1] == y)
+        {
+          if( z-speedBreaker.pos[2] <= 0.2 && z-speedBreaker.pos[2] >= -0.2)
+          {
+            if(time == 1)
+            {
+            alert("GAME OVER");
+            }
+            time = 1;
+            policebodyy.pos[2] = bodyy.pos[2] + 2.0;
+            policeheadd.pos[2] = headd.pos[2] + 2.0;
+          }
+        }
+  });
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
     if(time > 0)
     {
       bodyy.pos[2]-= 0.1;
@@ -357,7 +451,7 @@ function main() {
       else
       { 
         timeJet++;
-        if(timeJet >= 120)
+        if(timeJet >= 320)
         {
           flagDescend = 1;
           timeJet = 0;
@@ -538,32 +632,38 @@ function drawScene(gl, programInfo, deltaTime) {
       track2[i].drawTrack(gl, viewProjectionMatrix, programInfo, deltaTime);
       track3[i].drawTrack(gl, viewProjectionMatrix, programInfo, deltaTime);
     }
-    speedBreaker.drawBreaker(gl, viewProjectionMatrix, programInfo, deltaTime);    
+    speedBreaker.forEach(speedBreaker => {    
+      speedBreaker.drawBreaker(gl, viewProjectionMatrix, programInfo, deltaTime);
+    });    
     bodyy.drawBody(gl, viewProjectionMatrix, programInfo, deltaTime);
     headd.drawHead(gl, viewProjectionMatrix, programInfo, deltaTime);
     policebodyy.drawPolicebody(gl, viewProjectionMatrix, programInfo, deltaTime);
     policeheadd.drawPolicehead(gl, viewProjectionMatrix, programInfo, deltaTime);
     dogg.drawDog(gl, viewProjectionMatrix, programInfo, deltaTime);
-    hazard.drawHazardboards(gl, viewProjectionMatrix, programInfo, deltaTime);
-    if(flagCoin == 0)
-    {
-      coin.drawCoins(gl, viewProjectionMatrix, programInfo, deltaTime);
-    }
+    hazard.forEach(hazard => {
+      hazard.drawHazardboards(gl, viewProjectionMatrix, programInfo, deltaTime);
+    });
+    coin.forEach(cn => {
+      cn.drawCoins(gl, viewProjectionMatrix, programInfo, deltaTime);
+    });
     for(i=0;i<100;i++)
     {
       wallL[i].drawWall(gl, viewProjectionMatrix, programInfo, deltaTime);
       wallR[i].drawWall(gl, viewProjectionMatrix, programInfo, deltaTime);
     }
-    jetpackk.drawJetpack(gl, viewProjectionMatrix, programInfo, deltaTime);
+    jetpackk.forEach(jetpackk => {
+      jetpackk.drawJetpack(gl, viewProjectionMatrix, programInfo, deltaTime);
+    });
     for(i=0;i<50;i++)
     {
       cont[i].drawContainer(gl, viewProjectionMatrix, programInfo, deltaTime);
     }
-    if(flagShoe == 0)
-    {
-      bootup.drawBootsup(gl, viewProjectionMatrix, programInfo, deltaTime);
+    bootdown.forEach(bootdown => {
       bootdown.drawBootsdown(gl, viewProjectionMatrix, programInfo, deltaTime);
-    }
+    });
+    bootup.forEach(bootup => {
+      bootup.drawBootsup(gl, viewProjectionMatrix, programInfo, deltaTime);
+    });
 }
 
 //
